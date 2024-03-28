@@ -47,7 +47,7 @@ def logout_request(request):
 # Create a `registration` view to handle sign up request
 @csrf_exempt
 def registration(request):
-    context = {}
+    # context = {}
     data = json.loads(request.body)
     username = data['userName']
     password = data['password']
@@ -55,19 +55,21 @@ def registration(request):
     last_name = data['lastName']
     email = data['email']
     username_exist = False
-    email_exist = False
+    # email_exist = False
     try:
         # Check if user already exist
         User.objects.get(username=username)
         username_exist = True
-    except:
+    except Exception as err:
         # If not, simply log this is a new user
-        logger.debug("{} is new user".format(username))
+        logger.debug(f"Error {err}", "{} is new user".format(username))
     # If it is a new user
     if not username_exist:
         # Create user in auth_user table
-        user = User.objects.create_user(username=username, first_name=first_name, 
-                                        last_name=last_name, password=password, 
+        user = User.objects.create_user(username=username,
+                                        first_name=first_name,
+                                        last_name=last_name,
+                                        password=password,
                                         email=email)
         # Login the user and redirect to list page
         login(request, user)
@@ -127,13 +129,13 @@ def get_dealer_details(request, dealer_id):
 # ...
 def add_review(request):
     if not request.user.is_anonymous:
-        data = json.loads(request.body)
+        # data = json.loads(request.body)
         try:
-            response = post_review(data)
+            # response = post_review(data)
             return JsonResponse({"status": 200})
-        except:
+        except Exception as err:
             return JsonResponse({"status": 401,
-                                 "message": "Error in posting review"})
+                                 "message": f"Error{err} in posting review"})
     else:
         return JsonResponse({"status": 403, "message": "Unauthorized"})
 
@@ -147,6 +149,6 @@ def get_cars(request):
     car_models = CarModel.objects.select_related('car_make')
     cars = []
     for car_model in car_models:
-        cars.append({"CarModel": car_model.name, 
+        cars.append({"CarModel": car_model.name,
                      "CarMake": car_model.car_make.name})
     return JsonResponse({"CarModels": cars})
